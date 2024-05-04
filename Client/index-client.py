@@ -1,9 +1,29 @@
 import threading
 import socket
 
+def cripto(key: int, word: str) -> str:
+    cripto_word = ''
+    for i in word:
+        if i.isalpha():
+            base = ord('A') if i.isupper() else ord('a')
+            shift = (ord(i) - base + key) % 26
+            cripto_word += chr(shift + base)
+        else:
+            cripto_word += i
+    return cripto_word
+
+def decripto(key: int, word: str) -> str:
+    decripto_word = ''
+    for i in word:
+        if i.isalpha():
+            base = ord('A') if i.isupper() else ord('a')
+            shift = (ord(i) - base - key) % 26
+            decripto_word += chr(shift + base)
+        else:
+            decripto_word += i
+    return decripto_word
 
 def main():
-
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -11,35 +31,37 @@ def main():
     except:
         return print('\nNão foi possívvel se conectar ao servidor!\n')
 
-    username = input('Usuário> ')
-    print('\nConectado')
+    key = int(client.recv(1024).decode())
 
-    thread1 = threading.Thread(target=receiveMessages, args=[client])
-    thread2 = threading.Thread(target=sendMessages, args=[client, username])
+    username = input('Usuário> ')
+    print('\nConectado ao servidor com a chave:', key)
+
+    thread1 = threading.Thread(target=receiveMessages, args=[client, key])
+    thread2 = threading.Thread(target=sendMessages, args=[client, username, key])
 
     thread1.start()
     thread2.start()
 
-
-def receiveMessages(client):
+def receiveMessages(client, key):
     while True:
         try:
             msg = client.recv(2048).decode('utf-8')
-            print(msg+'\n')
+            decrypted_msg = decripto(key, msg)
+            print(decrypted_msg + '\n')
         except:
             print('\nNão foi possível permanecer conectado no servidor!\n')
             print('Pressione <Enter> Para continuar...')
             client.close()
             break
-            
 
-def sendMessages(client, username):
+def sendMessages(client, username, key):
     while True:
         try:
             msg = input('\n')
-            client.send(f'<{username}> {msg}'.encode('utf-8'))
+            encrypted_msg = cripto(key, f'<{username}> {msg}')
+            client.send(encrypted_msg.encode('utf-8'))
         except:
-            return
-
+            print("Erro ao enviar mensagem.")
+            break
 
 main()
