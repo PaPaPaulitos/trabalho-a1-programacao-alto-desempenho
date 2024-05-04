@@ -4,13 +4,12 @@ import time
 
 def tests_conections(num_conections):
     username = ""
-    for user in range(0,num_conections):
+    for user in range(0, num_conections):
         username = str(user)
         os.chdir("../Client")
-        subprocess.Popen(["python", "index_client.py", username], shell=True)
-        subprocess.Popen(["cmd", "/c"], creationflags=subprocess.CREATE_NEW_CONSOLE, shell=True)
+        subprocess.Popen(["python3", "index_client.py", username])
 
-tests=[10,20,100]
+tests = [100]
 
 for test in tests:
     print(f"Testando com {test} conexões.")
