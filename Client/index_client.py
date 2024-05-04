@@ -1,5 +1,6 @@
 import threading
 import socket
+import sys
 
 def cripto(key: int, word: str) -> str:
     cripto_word = ''
@@ -29,11 +30,15 @@ def main():
     try:
         client.connect(('localhost', 7777))
     except:
-        return print('\nNão foi possívvel se conectar ao servidor!\n')
+        return print('\nNão foi possível se conectar ao servidor!\n')
 
     key = int(client.recv(1024).decode())
-
-    username = input('Usuário> ')
+    
+    if len(sys.argv) > 1:
+        username =sys.argv[1]
+    else:
+        username = input('Usuário> ')
+    
     print('\nConectado ao servidor com a chave:', key)
 
     thread1 = threading.Thread(target=receiveMessages, args=[client, key])
